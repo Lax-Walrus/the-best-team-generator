@@ -4,6 +4,7 @@ const Intern = require("./lib/Intern");
 const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
+const { promisify } = require("util");
 
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
@@ -11,6 +12,7 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 const render = require("./lib/htmlRenderer");
 const Choice = require("inquirer/lib/objects/choice");
 const Employee = require("./lib/Employee");
+const employees = [];
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
@@ -41,29 +43,168 @@ function questionOne() {
       {
         type: "list",
         message: "what is your position?",
-        choices: ["Manager", "Engineer", "Intern", "Employee"],
+        choices: ["Manager", "Engineer", "Intern", "Employee", "Complete"],
         name: "position",
       },
     ])
     .then(function ({ position }) {
-      console.log(position);
       switch (position) {
         case "Manager":
-          console.log("I am a Manager");
+          manager();
           break;
 
         case "Engineer":
-          console.log("I am a Engineer");
+          engineer();
+
           break;
 
         case "Intern":
-          console.log("I am a Intern");
+          intern();
+
+          break;
+
+        case "Employee":
+          employee();
+
+          break;
+
+        case "Complete":
+          fs.writeFile(outputPath, render(employees), (err) =>
+            err ? err : console.log("no error")
+          );
           break;
 
         default:
-          console.log("hello Employee");
+          break;
       }
     });
 }
+function manager() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is your name?",
+        name: "name",
+      },
+      {
+        type: "number",
+        message: "What is your employee ID?",
+        name: "id",
+      },
+      {
+        type: "input",
+        message: "What is your email?",
+        name: "email",
+      },
+      {
+        type: "number",
+        message: "What is your office number?",
+        name: "officeNumber",
+      },
+    ])
+    .then((data) => {
+      const manager = new Manager(
+        data.name,
+        data.id,
+        data.email,
+        data.officeNumber
+      );
+      employees.push(manager);
+      questionOne();
+    });
+}
 
+function engineer() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is your name?",
+        name: "name",
+      },
+      {
+        type: "number",
+        message: "What is your employee ID?",
+        name: "id",
+      },
+      {
+        type: "input",
+        message: "What is your email?",
+        name: "email",
+      },
+      {
+        type: "input",
+        message: "What is your github?",
+        name: "github",
+      },
+    ])
+    .then((data) => {
+      const engineer = new Engineer(
+        data.name,
+        data.id,
+        data.email,
+        data.github
+      );
+      employees.push(engineer);
+      questionOne();
+    });
+}
+
+function intern() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is your name?",
+        name: "name",
+      },
+      {
+        type: "number",
+        message: "What is your employee ID?",
+        name: "id",
+      },
+      {
+        type: "input",
+        message: "What is your email?",
+        name: "email",
+      },
+      {
+        type: "school",
+        message: "Where do you school?",
+        name: "school",
+      },
+    ])
+    .then((data) => {
+      const intern = new Intern(data.name, data.id, data.email, data.school);
+      employees.push(intern);
+      questionOne();
+    });
+}
+
+function employee() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is your name?",
+        name: "name",
+      },
+      {
+        type: "number",
+        message: "What is your employee ID?",
+        name: "id",
+      },
+      {
+        type: "input",
+        message: "What is your email?",
+        name: "email",
+      },
+    ])
+    .then((data) => {
+      const employee = new Employee(data.name, data.id, data.email);
+      employees.push(employee);
+      questionOne();
+    });
+}
 questionOne();
